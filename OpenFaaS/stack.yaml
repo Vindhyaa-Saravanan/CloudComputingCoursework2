@@ -1,0 +1,10 @@
+version: 1.0
+provider:
+  name: openfaas
+  gateway: http://20.254.69.130:8080
+functions:
+  hello-vin-python:
+    lang: python3-http-debian
+    handler: ./hello-vin-python
+    image: vindhyaasaravanan2003/hello-vin-python:latest
+
