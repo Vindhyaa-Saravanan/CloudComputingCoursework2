@@ -1,3 +1,7 @@
 template
 build
 .secrets
+
+template
+build
+.secrets

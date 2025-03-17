@@ -8,3 +8,8 @@ functions:
     handler: ./hello-vin-python
     image: vindhyaasaravanan2003/hello-vin-python:latest
 
+  process-image:
+    lang: python3-http-debian
+    handler: ./process-image
+    image: vindhyaasaravanan2003/process-image:latest
+
