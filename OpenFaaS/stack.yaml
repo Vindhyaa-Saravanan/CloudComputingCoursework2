@@ -1,7 +1,7 @@
 version: 1.0
 provider:
   name: openfaas
-  gateway: http://20.254.69.130:8080
+  gateway: http://20.26.125.107:8080
 functions:
   hello-vin-python:
     lang: python3-http-debian
