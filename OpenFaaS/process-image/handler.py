@@ -1,39 +1,56 @@
 import logging
-from PIL import Image, ImageOps
 from io import BytesIO
 import requests
-import base64
 import time
+import json
+import numpy as np
+from tensorflow.keras.applications.mobilenet_v2 import MobileNetV2, preprocess_input, decode_predictions
+from tensorflow.keras.preprocessing import image
+
+# Load the MobileNetV2 model with pretrained weights on ImageNet.
+model = MobileNetV2(weights='imagenet')
 
 def handle(event, context):
-    start_time = time.time()
+    overall_start = time.time()
     try:
-        # Extract the image URL from the query parameters
+        # Extract the image URL from query parameters
         image_url = event.query.get('url')
         if not image_url:
             return {
                 "statusCode": 400,
                 "body": "Missing image URL"
             }
-
-        # Fetch the image from the URL
+        
+        # Network-bound task: Fetch the image
+        network_start = time.time()
         response = requests.get(image_url)
-        image = Image.open(BytesIO(response.content))
+        network_duration = time.time() - network_start
         
-        # Process the image
-        image = ImageOps.fit(image, (256, 256))
-        image = ImageOps.grayscale(image)
+        # CPU-bound task: Preprocess the image and run inference
+        cpu_start = time.time()
+        img = image.load_img(BytesIO(response.content), target_size=(224, 224))
+        x = image.img_to_array(img)
+        x = np.expand_dims(x, axis=0)
+        x = preprocess_input(x)
+        preds = model.predict(x)
+        predictions = decode_predictions(preds, top=3)[0]
+        cpu_duration = time.time() - cpu_start
         
-        # Encode the processed image to base64
-        buffered = BytesIO()
-        image.save(buffered, format="JPEG")
-        encoded = base64.b64encode(buffered.getvalue()).decode('utf-8')
-
-        # Calculate the elapsed time
-        elapsed = time.time() - start_time
+        overall_duration = time.time() - overall_start
+        
+        # Prepare the result in the same format as Azure function
+        result = {
+            "overall_duration": round(overall_duration, 2),
+            "network_duration": round(network_duration, 2),
+            "cpu_duration": round(cpu_duration, 2),
+            "predictions": [
+                {"label": pred[1], "probability": float(pred[2])} for pred in predictions
+            ]
+        }
+        
         return {
             "statusCode": 200,
-            "body": f"Processed in {elapsed:.2f}s, image (base64): {encoded[:100]}..."
+            "body": json.dumps(result)
         }
     except Exception as e:
         logging.error(e)

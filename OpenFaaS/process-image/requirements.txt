@@ -1,2 +1,4 @@
-Pillow
-requests
+requests==2.25.1
+tensorflow==2.16.1
+numpy==1.19.5
+Pillow==8.2.0
