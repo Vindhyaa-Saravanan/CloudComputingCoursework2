@@ -1,3 +1,11 @@
+# HANDLER.PY                     
+# Python file with OpenFaaS Function defined for Coursework 2.
+#
+# Name of Student: Vindhyaa Saravanan
+# Module: Cloud Computing Systems
+# Student ID: 201542641
+# Username: sc21vs
+
 import logging
 from io import BytesIO
 import requests
@@ -71,10 +79,10 @@ def handle(event, context):
         
         # Prepare the result in the same format as Azure function
         result = {
-            "overall_duration": round(overall_duration, 2),
-            "network_duration": round(network_duration, 2),
-            "cpu_duration": round(cpu_duration, 2),
-            "ml_duration": round(ml_duration, 2),
+            "overall_duration": round(overall_duration, 5),
+            "network_duration": round(network_duration, 5),
+            "cpu_duration": round(cpu_duration, 5),
+            "ml_duration": round(ml_duration, 5),
             "predictions": [
                 {"label": pred[1], "probability": float(pred[2])} for pred in predictions
             ]

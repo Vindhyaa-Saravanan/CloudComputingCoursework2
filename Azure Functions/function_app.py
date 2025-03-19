@@ -1,3 +1,11 @@
+# FUNCTION_APP.PY                     
+# Python file with Azure Function defined for Coursework 2.
+#
+# Name of Student: Vindhyaa Saravanan
+# Module: Cloud Computing Systems
+# Student ID: 201542641
+# Username: sc21vs
+
 import azure.functions as func 
 import logging
 import time
@@ -15,7 +23,9 @@ model = MobileNetV2(weights='imagenet')
 app = func.FunctionApp(http_auth_level=func.AuthLevel.ANONYMOUS)
 
 @app.route(route="classify_image")
+def classify_image(req: func.HttpRequest) -> func.HttpResponse:
     """Route for classifying an image using MobileNetV2.
+    
     This function accepts an HTTP GET request with an image URL as a query parameter.
     It fetches the image from the provided URL, preprocesses it to match the input
     requirements of the MobileNetV2 model, performs inference to classify the image,
@@ -35,8 +45,6 @@ app = func.FunctionApp(http_auth_level=func.AuthLevel.ANONYMOUS)
                 - `label` (str): The human-readable label of the predicted class (e.g., "golden retriever").
                 - `probability` (float): The confidence score of the prediction, ranging from 0 to 1.
     """
-def classify_image(req: func.HttpRequest) -> func.HttpResponse:
-    
     overall_start = time.time()
     try:
         # Extract the image URL from query parameters
@@ -68,10 +76,10 @@ def classify_image(req: func.HttpRequest) -> func.HttpResponse:
         
         # Return results as structured JSON response
         result = {
-            "overall_duration": round(overall_duration, 2),
-            "network_duration": round(network_duration, 2),
-            "cpu_duration": round(cpu_duration, 2),
-            "ml_duration": round(ml_duration, 2),
+            "overall_duration": round(overall_duration, 5),
+            "network_duration": round(network_duration, 5),
+            "cpu_duration": round(cpu_duration, 5),
+            "ml_duration": round(ml_duration, 5),
             "predictions": [
                 {"label": pred[1], "probability": float(pred[2])} for pred in predictions
             ]
