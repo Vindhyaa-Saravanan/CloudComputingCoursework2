@@ -29,6 +29,35 @@ results = []
 
 print("Starting cold start detection...")
 
+# Do initial call to then start exponential backoff
+print(f"First call to functions before starting exponential search...")
+for platform, url in [("Azure", AZURE_FUNCTION_URL), ("OpenFaaS", OPENFAAS_FUNCTION_URL)]:
+        initial_start_time = time.time()
+        
+        try:
+            response = requests.get(url, params={"url": IMAGE_URL})
+            initial_elapsed_time = time.time() - initial_start_time
+
+            if response.status_code == 200:
+                result = response.json()
+                entry = {
+                    "platform": platform,
+                    "wait_time": 0,
+                    "elapsed_time": initial_elapsed_time,   
+                    "total_duration": result["overall_duration"],
+                    "network_duration": result["network_duration"],
+                    "cpu_duration": result["cpu_duration"],
+                    "ml_duration": result["ml_duration"],
+                }
+                results.append(entry)
+                print(f"{platform}: {entry}")
+
+            else:
+                print(f"{platform}: Failed with status {response.status_code}")
+
+        except Exception as e:
+            print(f"{platform}: Request failed - {e}")
+
 wait_time = initial_wait_time
 while wait_time <= max_wait_time:
     print(f"\nWaiting {wait_time // 60} minutes before calling function...")
@@ -44,7 +73,6 @@ while wait_time <= max_wait_time:
 
             if response.status_code == 200:
                 result = response.json()
-                cold_start_detected = elapsed_time > 2 * result["overall_duration"]  # Heuristic check
                 entry = {
                     "platform": platform,
                     "wait_time": wait_time,
@@ -53,7 +81,6 @@ while wait_time <= max_wait_time:
                     "network_duration": result["network_duration"],
                     "cpu_duration": result["cpu_duration"],
                     "ml_duration": result["ml_duration"],
-                    "cold_start": cold_start_detected
                 }
                 results.append(entry)
                 print(f"{platform}: {entry}")
@@ -70,7 +97,7 @@ while wait_time <= max_wait_time:
 # Save results to CSV
 csv_filename = "cold_start_times.csv"
 with open(csv_filename, "w", newline="") as csvfile:
-    fieldnames = ["platform", "wait_time", "elapsed_time", "total_duration", "network_duration", "cpu_duration", "ml_duration", "cold_start"]
+    fieldnames = ["platform", "wait_time", "elapsed_time", "total_duration", "network_duration", "cpu_duration", "ml_duration"]
     writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
     writer.writeheader()
     writer.writerows(results)

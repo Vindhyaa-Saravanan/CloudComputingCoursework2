@@ -12,4 +12,6 @@ functions:
     lang: python3-http-debian
     handler: ./process-image
     image: vindhyaasaravanan2003/process-image:latest
+    labels:
+      com.openfaas.scale.zero: "true"
 
