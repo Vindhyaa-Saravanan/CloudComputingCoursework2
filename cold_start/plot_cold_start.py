@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 # Load data
-df = pd.read_csv("old_cold_start_times.csv")
+df = pd.read_csv("cold_start_times.csv")
 
 # Convert wait_time to minutes for better readability
 df["wait_time_minutes"] = df["wait_time"] / 60
